@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Student Information System{% endblock %}
+
+{% block content %}
+<main class="container mt-4">
+    <h2 class="mb-4">College List</h2>
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <div class="input-group">
+                <select class="form-select" style="max-width: 120px;">
+                    <option disabled selected>Field</option>
+                </select>
+                <input type="text" class="form-control" placeholder="Search">
+                <button class="btn custom-btn" type="button">Search</button>
+            </div>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <button class="btn btn-success">Add College</button>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>College Code</th>
+                    <th>College Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for college in colleges %}
+                <tr>
+                    <td>{{ college.id }}</td>
+                    <td>{{ college.name }}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm">Edit</button>
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
+{% endblock %}

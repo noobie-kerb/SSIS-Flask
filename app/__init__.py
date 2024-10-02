@@ -21,7 +21,7 @@ def initialize_app():
     mysql.init_app(app)
     CSRFProtect(app)
 
-    from .user import user_bp as user_blueprint
-    app.register_blueprint(user_blueprint)
+    from .controller import register_routes
+    register_routes(app)
 
     return app
