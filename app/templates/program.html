@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="col-md-4 text-md-end mt-3 mt-md-0">
-            <button class="btn btn-success">Add Program</button>
+            <button class="btn btn-success" data-bs-toggle = "modal" data-bs-target = "#addProgram">Add Program</button>
         </div>
     </div>
     <div class="table-responsive">
@@ -29,16 +29,14 @@
                 </tr>
             </thead>
             <tbody>
-                {% for student in students %}
+                {% for prog in program %}
                 <tr>
-                    <td>{{ student.id }}</td>
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.gender }}</td>
-                    <td>{{ student.course }}</td>
-                    <td>{{ student.year }}</td>
+                    <td>{{ prog[0] }}</td>
+                    <td>{{ prog[1] }}</td>
+                    <td>{{ prog[2] }}</td>
                     <td>
-                        <button class="btn btn-warning btn-sm">Edit</button>
-                        <button class="btn btn-danger btn-sm">Delete</button>
+                        <button class="btn btn-warning btn-sm edit-btn" data-bs-toggle = "modal" data-bs-target = "#editProgram" data-code = "{{prog[0]}}" data-name = "{{prog[1]}}" data-college = "{{prog[2]}}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-btn" data-bs-toggle = "modal" data-bs-target = "#deleteProgram" data-code = "{{prog[0]}}" data-name = "{{prog[1]}}" data-college = "{{prog[2]}}">Delete</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -46,4 +44,100 @@
         </table>
     </div>
 </main>
+
+<div class="modal fade" id="addProgram">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProgramLabel">Add Program</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProgramForm" action="/add_program" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label for="program_code" class="form-label">Program Code</label>
+                        <input type="text" class="form-control" id="program_code" name="program_code" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="program_name" class="form-label">Program Name</label>
+                        <input type="text" class="form-control" id="program_name" name="program_name" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="college_code" class="form-label">College</label>
+                        <select class="selectpicker" data-live-search="true" id="college_code" name="college_code" required>
+                            <option value="" disabled selected>Select a college</option>
+                            {% for code, name in form.college_code.choices %}
+                                <option value="{{ code }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>                    
+                    <button type="submit" class="btn btn-primary">Add Program</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <div class="modal fade" id="editProgram">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProgramLabel">Edit Program</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProgramForm" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label for="edit_program_code" class="form-label">Program Code</label>
+                        <input type="text" class="form-control" id="edit_program_code" name="edit_program_code" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_program_name" class="form-label">Program Name</label>
+                        <input type="text" class="form-control" id="edit_program_name" name="edit_program_name" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_program_name" class="form-label">College</label>
+                        <select class="selectpicker" data-live-search="true" id="college_code" name="college_code" required>
+                            <option value="" disabled selected>Select a college</option>
+                            {% for code, name in form.college_code.choices %}
+                                <option value="{{ code }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Edit Program</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+  
+<div class="modal fade" id="deleteProgram">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteProgramLabel">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this Program?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form id="deleteProgramForm" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/program_edit.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        $('#college_code').selectpicker();
+    });
+</script>
+
 {% endblock %}

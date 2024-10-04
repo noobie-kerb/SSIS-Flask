@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="col-md-4 text-md-end mt-3 mt-md-0">
-            <button class="btn btn-success">Add Student</button>
+            <button class="btn btn-success" data-bs-toggle = "modal" data-bs-target = "#addStudentModal">Add Student</button>
         </div>
     </div>
     <div class="table-responsive">
@@ -24,24 +24,26 @@
             <thead>
                 <tr>
                     <th>ID Number</th>
-                    <th>Name</th>
-                    <th>Gender</th>
-                    <th>Course</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Program</th>
                     <th>Year</th>
+                    <th>Gender</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                {% for student in students %}
+                {% for stud in student %}
                 <tr>
-                    <td>{{ student.id }}</td>
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.gender }}</td>
-                    <td>{{ student.course }}</td>
-                    <td>{{ student.year }}</td>
+                    <td>{{ stud[0] }}</td>
+                    <td>{{ stud[1] }}</td>
+                    <td>{{ stud[2] }}</td>
+                    <td>{{ stud[3] }}</td>
+                    <td>{{ stud[4] }}</td>
+                    <td>{{ stud[5] }}</td>
                     <td>
-                        <button class="btn btn-warning btn-sm">Edit</button>
-                        <button class="btn btn-danger btn-sm">Delete</button>
+                        <button class="btn btn-warning btn-sm" data-bs-toggle = "modal" data-bs-target = "#editStudentModal" data-id = "{{stud[0]}}" data-first-name = "{{stud[1]}}" data-last-name = "{{stud[2]}}" data-program ="{{stud[3]}}" data-year = "{{stud[4]}}" data-gender = "{{stud[5]}}" >Edit</button>
+                        <button class="btn btn-danger btn-sm delete-btn" data-bs-toggle = "modal" data-bs-target = "#deleteProgram">Delete</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -49,4 +51,119 @@
         </table>
     </div>
 </main>
+<div class="modal fade" id="addStudentModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addStudentModalLabel">Add Student</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addStudentForm" action="/add_student" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="mb-3">
+                <label for="student_id" class="form-label">Student ID </label>
+                <input type="text" class="form-control" id="student_id" name="student_id" required>
+              </div>
+            <div class="mb-3">
+              <label for="first_name" class="form-label">First Name</label>
+              <input type="text" class="form-control" id="first_name" name="first_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="course" class="form-label">Program</label>
+                <select class="selectpicker" data-live-search="true" id="course" name="course" required>
+                  <option value="" disabled selected>Select a program</option>
+                  {% for code, name in form.course.choices %}
+                      <option value="{{ code }}">{{ name }}</option>
+                  {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+                <label for="year" class="form-label">Year</label>
+                <select class="form-select" id="year" name="year" required>
+                  <option> 1 </option>
+                  <option> 2 </option>
+                  <option> 3 </option>
+                  <option> 4 </option>
+                  <option> Other(Master, PHD, etc)</option>
+                </select>
+            </div>
+            <div class="mb-3">
+              <label for="gender" class="form-label">Gender</label>
+              <select class="form-select" id="gender" name="gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Student</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="editStudentModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editStudentModalLabel">Edit Student</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editStudentForm" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="mb-3">
+                <label for="student_id" class="form-label">Student ID </label>
+                <input type="text" class="form-control" id="student_id" name="student_id" required>
+              </div>
+            <div class="mb-3">
+              <label for="first_name" class="form-label">First Name</label>
+              <input type="text" class="form-control" id="first_name" name="first_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="course" class="form-label">Program</label>
+                <select class="selectpicker" data-live-search="true" id="course" name="course" required>
+                  <option value="" disabled selected>Select a program</option>
+                  {% for code, name in form.course.choices %}
+                      <option value="{{ code }}">{{ name }}</option>
+                  {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+                <label for="year" class="form-label">Year</label>
+                <select class="form-select" id="year" name="year" required>
+                  <option> 1 </option>
+                  <option> 2 </option>
+                  <option> 3 </option>
+                  <option> 4 </option>
+                  <option> Other(Master, PHD, etc)</option>
+                </select>
+            </div>
+            <div class="mb-3">
+              <label for="gender" class="form-label">Gender</label>
+              <select class="form-select" id="gender" name="gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Student</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/student_edit.js') }}"></script>
+  <script>
+    $(document).ready(function() {
+        $('#program_code').selectpicker();
+    });
+</script>
 {% endblock %}
