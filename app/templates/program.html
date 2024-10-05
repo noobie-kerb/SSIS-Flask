@@ -54,23 +54,18 @@
             </div>
             <div class="modal-body">
                 <form id="addProgramForm" action="/add_program" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    {{ add_form.hidden_tag() }}
                     <div class="mb-3">
-                        <label for="program_code" class="form-label">Program Code</label>
-                        <input type="text" class="form-control" id="program_code" name="program_code" required autocomplete="off">
+                        {{ add_form.program_code.label(class = "form-label")}}
+                        {{ add_form.program_code(class = "form-control") }}
                     </div>
                     <div class="mb-3">
-                        <label for="program_name" class="form-label">Program Name</label>
-                        <input type="text" class="form-control" id="program_name" name="program_name" required autocomplete="off">
+                        {{ add_form.program_name.label(class = "form-label")}}
+                        {{ add_form.program_name(class = "form-control") }}
                     </div>
                     <div class="mb-3">
-                        <label for="college_code" class="form-label">College</label>
-                        <select class="selectpicker" data-live-search="true" id="college_code" name="college_code" required>
-                            <option value="" disabled selected>Select a college</option>
-                            {% for code, name in form.college_code.choices %}
-                                <option value="{{ code }}">{{ name }}</option>
-                            {% endfor %}
-                        </select>
+                        {{ add_form.college_code.label(class = "form-label")}}
+                        {{ add_form.college_code(class = "selectpicker") }}
                     </div>                    
                     <button type="submit" class="btn btn-primary">Add Program</button>
                 </form>
@@ -88,23 +83,18 @@
             </div>
             <div class="modal-body">
                 <form id="editProgramForm" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    {{ edit_form.hidden_tag() }}
                     <div class="mb-3">
-                        <label for="edit_program_code" class="form-label">Program Code</label>
-                        <input type="text" class="form-control" id="edit_program_code" name="edit_program_code" required autocomplete="off">
+                        {{ edit_form.edit_program_code.label(class = "form-label")}}
+                        {{ edit_form.edit_program_code(class = "form-control") }}
                     </div>
                     <div class="mb-3">
-                        <label for="edit_program_name" class="form-label">Program Name</label>
-                        <input type="text" class="form-control" id="edit_program_name" name="edit_program_name" required autocomplete="off">
+                        {{ edit_form.edit_program_name.label(class = "form-label")}}
+                        {{ edit_form.edit_program_name(class = "form-control") }}
                     </div>
                     <div class="mb-3">
-                        <label for="edit_program_name" class="form-label">College</label>
-                        <select class="selectpicker" data-live-search="true" id="college_code" name="college_code" required>
-                            <option value="" disabled selected>Select a college</option>
-                            {% for code, name in form.college_code.choices %}
-                                <option value="{{ code }}">{{ name }}</option>
-                            {% endfor %}
-                        </select>
+                        {{ edit_form.college_code.label(class = "form-label")}}
+                        {{ edit_form.college_code(class = "selectpicker") }}
                     </div>
                     <button type="submit" class="btn btn-primary">Edit Program</button>
                 </form>
@@ -126,7 +116,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         <form id="deleteProgramForm" method="POST">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+         {{ add_form.hidden_tag() }}
           <button type="submit" class="btn btn-danger">Delete</button>
         </form>
       </div>

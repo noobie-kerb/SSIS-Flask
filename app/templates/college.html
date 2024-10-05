@@ -53,14 +53,14 @@
         </div>
         <div class="modal-body">
           <form id="addCollegeForm" action="/add_college" method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {{ add_form.hidden_tag() }}
             <div class="mb-3">
-                <label for="college_code" class="form-label">College Code </label>
-                <input type="text" class="form-control" id="college_code" name="college_code" required autocomplete = "off">
+                {{ add_form.college_code.label(class = "form-label") }}
+                {{ add_form.college_code(class = "form-control" )}}
               </div>
             <div class="mb-3">
-              <label for="college_name" class="form-label">College Name </label>
-              <input type="text" class="form-control" id="college_name" name="college_name" required autocomplete = "off">
+                {{ add_form.college_name.label(class = "form-label") }}
+                {{ add_form.college_name(class = "form-control" )}}
             </div>
             <button type="submit" class="btn btn-primary">Add College</button>
           </form>
@@ -78,14 +78,14 @@
             </div>
             <div class="modal-body">
                 <form id="editCollegeForm" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                   {{ edit_form.hidden_tag() }}
                     <div class="mb-3">
-                        <label for="edit_college_code" class="form-label">College Code</label>
-                        <input type="text" class="form-control" id="edit_college_code" name="edit_college_code" required autocomplete="off">
+                      {{ edit_form.edit_college_code.label(class = "form-label") }}
+                      {{ edit_form.edit_college_code(class = "form-control", id = "edit_college_code")}}
                     </div>
                     <div class="mb-3">
-                        <label for="edit_college_name" class="form-label">College Name</label>
-                        <input type="text" class="form-control" id="edit_college_name" name="edit_college_name" required autocomplete="off">
+                      {{ edit_form.edit_college_name.label(class = "form-label") }}
+                      {{ edit_form.edit_college_name(class = "form-control", id = "edit_college_name" )}}
                     </div>
                     <button type="submit" class="btn btn-primary">Edit College</button>
                 </form>

@@ -9,7 +9,9 @@ CREATE TABLE Program (
     program_code VARCHAR(10) PRIMARY KEY,
     program_name VARCHAR(50),
     college VARCHAR(10),
-    FOREIGN KEY (college) REFERENCES College(college_code) ON DELETE CASCADE
+    FOREIGN KEY (college) REFERENCES College(college_code)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
 );
 
 CREATE TABLE Student (
@@ -17,5 +19,9 @@ CREATE TABLE Student (
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     program VARCHAR(10),
-    FOREIGN KEY (program) REFERENCES Program(program_code) ON DELETE CASCADE
+    year tinyint,
+    gender VARCHAR(20),
+    FOREIGN KEY (program) REFERENCES Program(program_code)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
 );
