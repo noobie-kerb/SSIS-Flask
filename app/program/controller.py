@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash
 from .forms import addProgramForm, editProgramForm, deleteProgramForm
 from app.models import database_connect
-from mysql.connector import connect, Error
+from mysql.connector import connect, Error, IntegrityError
 import mysql.connector
 from ..program import program_bp
 
@@ -54,20 +54,25 @@ def add_program():
          cursor.execute(sql, (program_code, program_name, college_code))
          db.commit()
          
+         flash("Program added successfully!", "success")
          return redirect(url_for("program.program"))
       
       else:
-         print(form.errors)
-         
+         flash("Program Code cannot contain spaces.", "danger")
+
+   except IntegrityError as e:
+            if e.errno == 1062:
+                flash("College code already exists. Please use a different code.", "danger")      
+
    except Exception as e:
-      flash(f"An Error Occured:{e}", "error")
+      flash(f"An Error Occured:{e}", "danger")
    finally:
       if cursor:
          cursor.close()
       if db:
          db.close()
    
-   return render_template("program.html", form = form)
+   return redirect(url_for("program.program"))
 
 @program_bp.route("/edit_program/<program_code>", methods =["POST", "GET"])
 def edit_program(program_code):
@@ -76,6 +81,7 @@ def edit_program(program_code):
    cursor.execute("SELECT college_code, college_name FROM college")
    colleges = cursor.fetchall()
 
+   add_form = addProgramForm()
    edit_form = editProgramForm()
    edit_form.college_code.choices = [(college[0], college[1]) for college in colleges]
 
@@ -92,7 +98,7 @@ def edit_program(program_code):
          edit_form.edit_program_name.data = program['program_name']
          edit_form.college_code.data = program['college_code']
 
-         return render_template("program.html", edit_form = edit_form)
+         return redirect(url_for("program.program"))
       
       elif request.method == "POST":
          if edit_form.validate_on_submit():
@@ -103,13 +109,19 @@ def edit_program(program_code):
             sql = "UPDATE Program SET program_code = %s, program_name = %s, college = %s WHERE program_code = %s"
             cursor.execute(sql, (new_program_code, new_program_name, new_college, program_code))
             db.commit()
-            flash(f"Edited Successfully","success")
-
+            flash(f"Program edited successfully!","success")
             return redirect(url_for("program.program"))
          else:
-            print(edit_form.errors)
+            flash("Program Code cannot contain spaces.", "danger")
+
+      return redirect(url_for("program.program"))
+   except IntegrityError as e:
+            if e.errno == 1062:
+                flash("Program code already exists. Please use a different code.", "danger")  
+                return redirect(url_for("program.program"))  
+
    except Exception as e:
-      flash(f"An Error Occured:{e}", "error")
+      flash(f"An Error Occured:{e}", "danger")
 
    finally:
       if cursor:
@@ -117,7 +129,7 @@ def edit_program(program_code):
       if db:
          db.close()
 
-   return render_template("program.html", edit_form = edit_form)
+   return render_template("program.html", edit_form = edit_form, add_form = add_form)
 
 @program_bp.route("/delete_program/<program_code>", methods = ["POST", "GET"])
 
@@ -131,6 +143,7 @@ def delete_program(program_code):
       db.commit()
       cursor.close()
       db.close()
+      flash("Program deleted successfully!", "success")
       return redirect(url_for("program.program"))
    
    return redirect(url_for("program.program"))

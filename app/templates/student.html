@@ -8,11 +8,16 @@
     <div class="row mb-3">
         <div class="col-md-8">
             <div class="input-group">
-                <select class="form-select" style="max-width: 120px;">
-                    <option disabled selected>Field</option>
+                <select id = "search_field" class="form-select" style="max-width: 120px;">
+                    <option value = "all">Field</option>
+                    <option value = "0"> ID Number </option>
+                    <option value = "1"> First Name </option>
+                    <option value = "2"> Last Name </option>
+                    <option value = "3"> Program </option>
+                    <option value = "4"> Year </option>
+                    <option value = "5"> Gender </option>
                 </select>
-                <input type="text" class="form-control" placeholder="Search">
-                <button class="btn custom-btn" type="button">Search</button>
+                <input type="text" id="search_input" class = "form-control" placeholder="Search">
             </div>
         </div>
         <div class="col-md-4 text-md-end mt-3 mt-md-0">
@@ -20,7 +25,7 @@
         </div>
     </div>
     <div class="table-responsive">
-        <table class="table table-striped">
+        <table id = "student_table" class="table table-striped">
             <thead>
                 <tr>
                     <th>ID Number</th>
@@ -43,7 +48,7 @@
                     <td>{{ stud[5] }}</td>
                     <td>
                         <button class="btn btn-warning btn-sm edit-btn" data-bs-toggle = "modal" data-bs-target = "#editStudentModal" data-id = "{{stud[0]}}" data-first-name = "{{stud[1]}}" data-last-name = "{{stud[2]}}" data-program ="{{stud[3]}}" data-year = "{{stud[4]}}" data-gender = "{{stud[5]}}" >Edit</button>
-                        <button class="btn btn-danger btn-sm delete-btn" data-bs-toggle = "modal" data-bs-target = "#deleteProgram">Delete</button>
+                        <button class="btn btn-danger btn-sm delete-btn" data-bs-toggle="modal" data-bs-target="#deleteStudent" data-id="{{ stud[0] }}">Delete</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -133,6 +138,29 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="deleteStudent">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteStudentLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this Student?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteStudentForm" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
   <script src="{{ url_for('static', filename='js/student_edit.js') }}"></script>
   <script>
     $(document).ready(function() {

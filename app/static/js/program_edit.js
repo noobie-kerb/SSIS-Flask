@@ -36,3 +36,40 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchField = document.getElementById('search_field');
+    const searchInput = document.getElementById('search_input');
+    const table = document.getElementById('program_table');
+    const rows = table.getElementsByTagName('tr');
+
+    function filterTable() {
+        const filter = searchInput.value.toUpperCase();
+        const fieldIndex = searchField.value;
+
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let match = false;
+
+            if (fieldIndex === 'all') {
+                const codeMatch = cells[0].textContent.toUpperCase().startsWith(filter);
+                const nameMatch = cells[1].textContent.toUpperCase().includes(filter);
+                match = codeMatch || nameMatch;
+            } else if (fieldIndex === '0') {
+                match = cells[0].textContent.toUpperCase().startsWith(filter);
+            } else if (fieldIndex === '1') {
+                match = cells[1].textContent.toUpperCase().includes(filter);
+            }
+              else if (fieldIndex === '2'){
+                match = cells[2].textContent.toUpperCase().startsWith(filter);
+            }
+
+
+            row.style.display = match ? '' : 'none';
+        }
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    searchField.addEventListener('change', filterTable);
+});

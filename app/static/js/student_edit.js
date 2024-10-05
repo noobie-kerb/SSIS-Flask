@@ -31,13 +31,64 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener('DOMContentLoaded', function () {
     const deleteButtons = document.querySelectorAll('.delete-btn');
+    const deleteForm = document.getElementById('deleteStudentForm');
     
     deleteButtons.forEach(button => {
         button.addEventListener('click', function () {
-            const program_code = this.getAttribute('data-code');
-            
-            const deleteForm = document.getElementById('deleteProgramForm');
-            deleteForm.action = `/delete_program/${program_code}`;
+            const studentId = this.getAttribute('data-id');
+            deleteForm.action = `/delete_student/${studentId}`;
         });
     });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchField = document.getElementById('search_field');
+    const searchInput = document.getElementById('search_input');
+    const table = document.getElementById('student_table');
+    const rows = table.getElementsByTagName('tr');
+
+    function filterTable() {
+        const filter = searchInput.value.toUpperCase();
+        const fieldIndex = searchField.value;
+
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let match = false;
+
+            if (fieldIndex === 'all') {
+                const IDMatch = cells[0].textContent.toUpperCase().includes(filter);
+                const FirstNameMatch = cells[1].textContent.toUpperCase().includes(filter);
+                const LastNameMatch = cells[2].textContent.toUpperCase().includes(filter);
+                const ProgramMatch = cells[3].textContent.toUpperCase().startsWith(filter);
+                const YearMatch = cells[4].textContent.toUpperCase().startsWith(filter);
+                const GenderMatch = cells[5].textContent.toUpperCase().startsWith(filter);
+                
+                match = IDMatch || FirstNameMatch || LastNameMatch || ProgramMatch || YearMatch || GenderMatch;
+            } else if (fieldIndex === '0') {
+                match = cells[0].textContent.toUpperCase().includes(filter);
+            } else if (fieldIndex === '1') {
+                match = cells[1].textContent.toUpperCase().includes(filter);
+            }
+              else if (fieldIndex === '2'){
+                match = cells[2].textContent.toUpperCase().includes(filter);
+            }
+            else if (fieldIndex === '3'){
+                match = cells[3].textContent.toUpperCase().startsWith(filter);
+            }
+            else if (fieldIndex === '4'){
+                match = cells[4].textContent.toUpperCase().startsWith(filter);
+            }
+            else if (fieldIndex === '5'){
+                match = cells[5].textContent.toUpperCase().startsWith(filter);
+            }
+            
+
+
+            row.style.display = match ? '' : 'none';
+        }
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    searchField.addEventListener('change', filterTable);
 });

@@ -2,7 +2,7 @@ from flask import  render_template, redirect, request,url_for, flash
 from .forms import addStudentForm, editStudentForm, deleteStudentForm
 from ..student import student_bp
 from app.models import database_connect
-from mysql.connector import connect, Error
+from mysql.connector import connect, Error, IntegrityError
 import mysql.connector
 from ..program import program_bp
 
@@ -55,10 +55,16 @@ def add_student():
          cursor.execute(sql, (student_id, first_name, last_name, course, year, gender))
          db.commit()
 
+         flash("Student added successfully!", "success")
+         return redirect(url_for("student.student"))
+      else:
+         flash("Please follow the format for student ID: XXXX-XXXX(2022-0076)", "danger")  
          return redirect(url_for("student.student"))
       
-      else:
-         print(add_form.errors)
+   except IntegrityError as e:
+        if e.errno == 1062:
+            flash("Student_ID already exists. Please use your own ID.", "danger")  
+            return redirect(url_for("student.student"))   
 
    except Exception as e:
          flash(f"An Error Occurred: {e}", "Error")
@@ -114,12 +120,18 @@ def edit_student(student_id):
                                     new_course, new_year, new_gender, student_id))
                 db.commit()
                 flash("Student edited successfully", "success")
-
                 return redirect(url_for("student.student"))
             else:
-                print(edit_form.errors)
+                flash("Please follow the format for student ID: XXXX-XXXX(2022-0076)", "danger")  
+                return redirect(url_for("student.student"))
+
+    except IntegrityError as e:
+        if e.errno == 1062:
+            flash("Student_ID already exists. Please use your own ID.", "danger")  
+            return redirect(url_for("student.student"))
+        
     except Exception as e:
-        flash(f"An error occurred: {str(e)}", "error")
+        flash(f"An error occurred: {str(e)}", "danger")
 
     finally:
         if cursor:
@@ -128,3 +140,24 @@ def edit_student(student_id):
             db.close()
 
     return render_template("student.html", edit_form = edit_form)
+
+@student_bp.route("/delete_student/<student_id>", methods=['POST'])
+def delete_student(student_id):
+    db, cursor = database_connect()
+    if not db or not cursor:
+        flash("Cannot connect to database")
+        return redirect(url_for("student.student"))
+    
+    try:
+        sql = "DELETE FROM Student WHERE student_id = %s"
+        cursor.execute(sql, (student_id,))
+        db.commit()
+        flash("Student deleted successfully", "success")
+    except Exception as e:
+        db.rollback()
+        flash(f"Error deleting student: {str(e)}", "danger")
+    finally:
+        cursor.close()
+        db.close()
+
+    return redirect(url_for("student.student"))
