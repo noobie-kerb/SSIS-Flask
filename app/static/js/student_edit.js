@@ -82,8 +82,6 @@ document.addEventListener('DOMContentLoaded', function() {
             else if (fieldIndex === '5'){
                 match = cells[5].textContent.toUpperCase().startsWith(filter);
             }
-            
-
 
             row.style.display = match ? '' : 'none';
         }

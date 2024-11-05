@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField
 from wtforms.validators import DataRequired, ValidationError
 import re
+from flask_wtf.file import FileField, FileAllowed, file_required
 
 class addStudentForm(FlaskForm):
     student_id = StringField('Student ID', validators=[DataRequired()])
@@ -10,6 +11,9 @@ class addStudentForm(FlaskForm):
     course = SelectField('Course', choices=[], validators=[DataRequired()])
     year = SelectField('Year', choices=[('1', '1st Year'), ('2', '2nd Year'), ('3', '3rd Year'), ('4', '4th Year')], validators=[DataRequired()])
     gender = SelectField('Gender', choices=[('Male', 'Male'), ('Female', 'Female')], validators=[DataRequired()])
+    photo = FileField('Student Photo', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!')
+    ])
     submit = SubmitField('Add Student')
 
     def validate_student_id(self, field):
@@ -23,6 +27,7 @@ class editStudentForm(FlaskForm):
     course = SelectField('Course', choices=[], validators=[DataRequired()])
     edit_year = SelectField('Year', choices=[('1', '1st Year'), ('2', '2nd Year'), ('3', '3rd Year'), ('4', '4th Year')], validators=[DataRequired()])
     edit_gender = SelectField('Gender', choices=[('Male', 'Male'), ('Female', 'Female')], validators=[DataRequired()])
+    edit_photo = FileField('editPhoto', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!'), file_required('File was empty!')], render_kw={'id': 'editPhoto'})
     submit = SubmitField('Edit Student')
 
     def validate_edit_student_id(self, field):

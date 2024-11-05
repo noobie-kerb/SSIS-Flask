@@ -1,4 +1,4 @@
-from flask import render_template, redirect, request, jsonify
+from flask import render_template, redirect
 from .student import student_bp
 from .college import college_bp
 from .program import program_bp

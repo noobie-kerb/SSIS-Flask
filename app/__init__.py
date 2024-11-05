@@ -1,8 +1,11 @@
-from config import secretKey, databaseHost, databaseName, databasePassword, databaseUser, BOOTSTRAP_SERVE_LOCAL
+from config import secretKey, databaseHost, databaseName, databasePassword, databaseUser, BOOTSTRAP_SERVE_LOCAL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET 
 from flask import Flask 
 from flask_bootstrap import Bootstrap 
 from flask_wtf.csrf import CSRFProtect
 from mysql.connector import connect, Error
+import cloudinary
+from cloudinary.uploader import upload
+import cloudinary.api
 
 bootstrap = Bootstrap()
 csrf=CSRFProtect()
@@ -16,6 +19,11 @@ def initialize_app():
         MYSQL_DB=databaseName,
         MYSQL_HOST=databaseHost,
         BOOTSTRAP_SERVE_LOCAL=BOOTSTRAP_SERVE_LOCAL
+    )
+    cloudinary.config(
+        cloud_name = CLOUDINARY_CLOUD_NAME,
+        api_key = CLOUDINARY_API_KEY,
+        api_secret = CLOUDINARY_API_SECRET
     )
     try:
         db = connect(
