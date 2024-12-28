@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const IDMatch = cells[1].textContent.toUpperCase().includes(filter);
                 const FirstNameMatch = cells[2].textContent.toUpperCase().includes(filter);
                 const LastNameMatch = cells[3].textContent.toUpperCase().includes(filter);
-                const ProgramMatch = cells[4].textContent.toUpperCase().startsWith(filter);
+                const ProgramMatch = cells[4].textContent.toUpperCase().includes(filter);
                 const YearMatch = cells[5].textContent.toUpperCase().startsWith(filter);
                 const GenderMatch = cells[6].textContent.toUpperCase().startsWith(filter);
                 
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 match = cells[3].textContent.toUpperCase().includes(filter);
             }
             else if (fieldIndex === '3'){
-                match = cells[4].textContent.toUpperCase().startsWith(filter);
+                match = cells[4].textContent.toUpperCase().includes(filter);
             }
             else if (fieldIndex === '4'){
                 match = cells[5].textContent.toUpperCase().startsWith(filter);

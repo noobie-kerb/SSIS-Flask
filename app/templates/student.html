@@ -48,9 +48,7 @@
                 {% for stud in student %}
                 <tr>
                     <td>
-                        <a href="#" class="view-photo" data-photo-url="{% if stud[6] %}{{ stud[6] }}{% else %}{{ url_for('static', filename='images/default-avatar.png') }}{% endif %}" data-student-name="{{ stud[1] }} {{ stud[2] }}">
-                            View Photo
-                        </a>
+                        <img class="image-style" src = "{% if stud[6] %}{{stud[6]}}{% else %}{{url_for('static', filename='images/default-avatar.png')}}{% endif %}">
                     </td>
                     <td>{{ stud[0] }}</td>
                     <td>{{ stud[1] }}</td>

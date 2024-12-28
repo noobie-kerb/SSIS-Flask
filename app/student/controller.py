@@ -42,6 +42,8 @@ def student():
 
 @student_bp.route("/add_student", methods=["POST"])
 def add_student():
+    page = request.args.get('page', 1, type = int)
+    total_pages = 0
     add_form = addStudentForm()
     programs = get_programs()
     add_form.course.choices = [(program[0], program[1]) for program in programs]
@@ -79,7 +81,8 @@ def add_student():
             return redirect(url_for("student.student"))
         else:
             print(add_form.errors)
-            flash("Please follow the format for student ID: XXXX-XXXX(2022-0076)", "danger")  
+
+            flash(f"Error adding student: {add_form.errors}", "danger")  
             return redirect(url_for("student.student"))
             
     except IntegrityError as e:
@@ -92,7 +95,7 @@ def add_student():
         flash(f"An Error Occurred: {e}", "error")
 
     edit_form = editStudentForm()
-    return render_template("student.html", add_form=add_form, edit_form=edit_form)
+    return render_template("student.html", add_form=add_form, edit_form=edit_form, current_page = page, total_pages = total_pages)
 
 
 @student_bp.route("/edit_student/<student_id>", methods=["POST", "GET"])

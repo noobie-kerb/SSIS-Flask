@@ -4,6 +4,15 @@ from wtforms.validators import DataRequired, ValidationError, Optional
 import re
 from flask_wtf.file import FileField, FileAllowed, file_required
 
+def FileSizeLimit(max_size_in_mb):
+    max_bytes = max_size_in_mb*1024*1024
+    def file_length_check(form, field):
+        if len(field.data.read()) > max_bytes:
+            raise ValidationError(f"File size must be less than {max_size_in_mb}MB")
+        field.data.seek(0)
+    return file_length_check
+
+
 class addStudentForm(FlaskForm):
     student_id = StringField('Student ID', validators=[DataRequired()])
     first_name = StringField('First Name', validators=[DataRequired()])
@@ -12,7 +21,7 @@ class addStudentForm(FlaskForm):
     year = SelectField('Year', choices=[('1', '1st Year'), ('2', '2nd Year'), ('3', '3rd Year'), ('4', '4th Year')], validators=[DataRequired()])
     gender = SelectField('Gender', choices=[('Male', 'Male'), ('Female', 'Female')], validators=[DataRequired()])
     photo = FileField('Student Photo', validators=[
-        FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!')
+        FileAllowed(['jpg', 'jpeg', 'png'], 'Images only!'), FileSizeLimit(max_size_in_mb = 5)
     ])
     submit = SubmitField('Add Student')
 

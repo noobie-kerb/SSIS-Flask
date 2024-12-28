@@ -14,7 +14,8 @@ def get_total_students():
 def get_students(per_page, offset):
     db, cursor = database_connect()
     try:
-        cursor.execute( "SELECT student_id, first_name, last_name, program, year, gender, photo_url FROM Student LIMIT %s OFFSET %s",
+
+        cursor.execute("SELECT s.student_id, s.first_name, s.last_name, CONCAT(p.program_code,'(', c.college_name, ')') as program_college, s.year, s.gender, s.photo_url FROM Student s JOIN program p ON s.program = p.program_code JOIN college c ON p.college = c.college_code LIMIT %s OFFSET %s",
             (per_page, offset)
         )
         return cursor.fetchall()

@@ -157,3 +157,7 @@ th {
     border: none;
     cursor: pointer;
 }
+.image-style {
+    height: auto;
+    width: 150px;
+}
