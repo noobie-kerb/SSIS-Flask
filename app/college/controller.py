@@ -1,5 +1,6 @@
 from ..college import college_bp
 from flask import render_template, request, redirect, url_for, flash
+import math
 from .forms import addCollegeForm, editCollegeForm, deleteCollegeForm
 from app.models import database_connect
 from mysql.connector import connect, Error, IntegrityError
@@ -7,6 +8,11 @@ import mysql.connector
 
 @college_bp.route("/college")
 def college():
+   page = request.args.get('page', 1, type=int)
+   per_page = 13
+   offset = (page - 1) * per_page
+   total_pages = 0
+
    db, cursor= database_connect()
    add_form = addCollegeForm()
    edit_form = editCollegeForm()
@@ -14,12 +20,18 @@ def college():
       flash("Unable to connect to the database", "error")
       return render_template("college.html")
    try:
-      cursor.execute("SELECT * FROM College")
+      cursor.execute("SELECT COUNT(*) FROM College")
+      total_colleges = cursor.fetchone()[0]
+
+      cursor.execute("SELECT * FROM College LIMIT %s OFFSET %s", (per_page, offset))
       colleges = cursor.fetchall()
-      return render_template("college.html", add_form = add_form, edit_form = edit_form, college = colleges)
+
+      total_pages = math.ceil(total_colleges / per_page)
+
+      return render_template("college.html", add_form = add_form, edit_form = edit_form, college = colleges, current_page = page, total_pages = total_pages)
    except Error as e:
       flash(f"An Error Occured:{e}", Error)
-      return render_template("college.html", college= [], edit_form = edit_form, add_form = add_form)
+      return render_template("college.html", college= [], edit_form = edit_form, add_form = add_form, current_page = page, total_pages = total_pages)
    finally:
       cursor.close()
       db.close()

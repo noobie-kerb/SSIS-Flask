@@ -1,4 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash
+import math
 from .forms import addProgramForm, editProgramForm, deleteProgramForm
 from app.models import database_connect
 from mysql.connector import connect, Error, IntegrityError
@@ -7,6 +8,11 @@ from ..program import program_bp
 
 @program_bp.route("/program", methods = ["POST", "GET"])
 def program():
+   page = request.args.get('page', 1, type=int)
+   per_page = 13
+   offset = (page - 1) * per_page
+   total_pages = 0
+
    db, cursor= database_connect()
    add_form = addProgramForm()
    edit_form = editProgramForm()
@@ -14,20 +20,25 @@ def program():
       flash("Unable to connect to the database", "error")
       return render_template("program.html")
    try:
-      cursor.execute("SELECT * FROM Program")
+      cursor.execute("SELECT COUNT(*) FROM Program")
+      total_programs = cursor.fetchone()[0]
+
+      cursor.execute("SELECT * FROM Program LIMIT %s OFFSET %s", (per_page, offset))
       programs = cursor.fetchall()
 
       cursor.execute("SELECT college_code, college_name FROM college")
       colleges = cursor.fetchall()
 
+      total_pages = math.ceil(total_programs / per_page)
+
       add_form.college_code.choices = [(college[0], college[1]) for college in colleges]
       edit_form.college_code.choices = [(college[0], college[1]) for college in colleges]
 
-      return render_template("program.html", add_form = add_form, edit_form = edit_form, program = programs)
+      return render_template("program.html", add_form = add_form, edit_form = edit_form, program = programs, current_page = page, total_pages = total_pages)
    
    except Error as e:
       flash(f"An Error Occured:{e}", "Error")
-      return render_template("program.html", add_form = add_form, edit_form = edit_form, program = [])
+      return render_template("program.html", add_form = add_form, edit_form = edit_form, program = [], current_page = page, total_pages = total_pages)
    
    finally:
       cursor.close()

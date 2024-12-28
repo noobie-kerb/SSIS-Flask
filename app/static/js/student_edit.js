@@ -57,30 +57,30 @@ document.addEventListener('DOMContentLoaded', function() {
             let match = false;
 
             if (fieldIndex === 'all') {
-                const IDMatch = cells[0].textContent.toUpperCase().includes(filter);
-                const FirstNameMatch = cells[1].textContent.toUpperCase().includes(filter);
-                const LastNameMatch = cells[2].textContent.toUpperCase().includes(filter);
-                const ProgramMatch = cells[3].textContent.toUpperCase().startsWith(filter);
-                const YearMatch = cells[4].textContent.toUpperCase().startsWith(filter);
-                const GenderMatch = cells[5].textContent.toUpperCase().startsWith(filter);
+                const IDMatch = cells[1].textContent.toUpperCase().includes(filter);
+                const FirstNameMatch = cells[2].textContent.toUpperCase().includes(filter);
+                const LastNameMatch = cells[3].textContent.toUpperCase().includes(filter);
+                const ProgramMatch = cells[4].textContent.toUpperCase().startsWith(filter);
+                const YearMatch = cells[5].textContent.toUpperCase().startsWith(filter);
+                const GenderMatch = cells[6].textContent.toUpperCase().startsWith(filter);
                 
                 match = IDMatch || FirstNameMatch || LastNameMatch || ProgramMatch || YearMatch || GenderMatch;
             } else if (fieldIndex === '0') {
-                match = cells[0].textContent.toUpperCase().includes(filter);
-            } else if (fieldIndex === '1') {
                 match = cells[1].textContent.toUpperCase().includes(filter);
-            }
-              else if (fieldIndex === '2'){
+            } else if (fieldIndex === '1') {
                 match = cells[2].textContent.toUpperCase().includes(filter);
             }
-            else if (fieldIndex === '3'){
-                match = cells[3].textContent.toUpperCase().startsWith(filter);
+              else if (fieldIndex === '2'){
+                match = cells[3].textContent.toUpperCase().includes(filter);
             }
-            else if (fieldIndex === '4'){
+            else if (fieldIndex === '3'){
                 match = cells[4].textContent.toUpperCase().startsWith(filter);
             }
-            else if (fieldIndex === '5'){
+            else if (fieldIndex === '4'){
                 match = cells[5].textContent.toUpperCase().startsWith(filter);
+            }
+            else if (fieldIndex === '5'){
+                match = cells[6].textContent.toUpperCase().startsWith(filter);
             }
 
             row.style.display = match ? '' : 'none';

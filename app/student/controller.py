@@ -1,4 +1,6 @@
 from flask import  render_template, redirect, request,url_for, flash
+import math
+from math import ceil
 from .forms import addStudentForm, editStudentForm, deleteStudentForm
 from ..student import student_bp
 from app.models import database_connect
@@ -13,6 +15,11 @@ import re
 @student_bp.route("/")
 @student_bp.route("/student", methods = ['POST', 'GET'])
 def student():
+   page = request.args.get('page', 1, type=int)
+   per_page = 13
+   offset = (page - 1) * per_page
+   total_pages = 0
+
    db,cursor = database_connect()
    add_form = addStudentForm()
    edit_form = editStudentForm()
@@ -20,19 +27,26 @@ def student():
       flash("Unable to connect to the database", "error")
       return render_template("student.html", add_form = add_form, edit_form = edit_form)
    try:
-      cursor.execute("SELECT * FROM student")
+      cursor.execute("SELECT COUNT(*) FROM Student")
+      total_students = cursor.fetchone()[0]
+
+      cursor.execute(
+        "SELECT student_id, first_name, last_name, program, year, gender FROM Student LIMIT %s OFFSET %s",
+        (per_page, offset)
+    )
       students = cursor.fetchall()
-      
+      total_pages = math.ceil(total_students / per_page)
+
       cursor.execute("SELECT program_code, program_name FROM program")
       programs = cursor.fetchall()
 
       add_form.course.choices = [(program[0], program[1]) for program in programs]
       edit_form.course.choices = [(program[0], program[1]) for program in programs]
    
-      return render_template("student.html", add_form = add_form, edit_form = edit_form, student = students)
+      return render_template("student.html", add_form = add_form, edit_form = edit_form, student = students, current_page = page, total_pages = total_pages)
    except Exception as e:
-      flash(f"An Error Occurred", "Error")
-      return render_template("student.html", add_form = add_form, edit_form = edit_form, student = [])
+      flash(f"An Error Occurred", "danger")
+      return render_template("student.html", add_form = add_form, edit_form = edit_form, student = [], current_page = page, total_pages = total_pages)
    finally:
       cursor.close()
       db.close()
