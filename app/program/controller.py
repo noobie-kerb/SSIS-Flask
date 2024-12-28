@@ -5,6 +5,7 @@ from app.models import database_connect
 from mysql.connector import connect, Error, IntegrityError
 import mysql.connector
 from ..program import program_bp
+from app.models.program_model import *
 
 @program_bp.route("/program", methods = ["POST", "GET"])
 def program():
@@ -13,21 +14,16 @@ def program():
    offset = (page - 1) * per_page
    total_pages = 0
 
-   db, cursor= database_connect()
    add_form = addProgramForm()
    edit_form = editProgramForm()
-   if not db or not cursor:
-      flash("Unable to connect to the database", "error")
-      return render_template("program.html")
+   
    try:
-      cursor.execute("SELECT COUNT(*) FROM Program")
-      total_programs = cursor.fetchone()[0]
+      total_programs = get_total_programs()
 
-      cursor.execute("SELECT * FROM Program LIMIT %s OFFSET %s", (per_page, offset))
-      programs = cursor.fetchall()
+      programs = get_programs(per_page, offset)
 
-      cursor.execute("SELECT college_code, college_name FROM college")
-      colleges = cursor.fetchall()
+      
+      colleges = get_colleges()
 
       total_pages = math.ceil(total_programs / per_page)
 
@@ -40,18 +36,12 @@ def program():
       flash(f"An Error Occured:{e}", "Error")
       return render_template("program.html", add_form = add_form, edit_form = edit_form, program = [], current_page = page, total_pages = total_pages)
    
-   finally:
-      cursor.close()
-      db.close()
-
 
 @program_bp.route('/add_program', methods=['POST'])
 def add_program():
    form = addProgramForm()
-   db, cursor = database_connect()
 
-   cursor.execute("SELECT college_code, college_name FROM college")
-   colleges = cursor.fetchall()
+   colleges = get_colleges()
 
    form.college_code.choices = [(college[0], college[1]) for college in colleges]
 
@@ -61,9 +51,7 @@ def add_program():
          program_name = form.program_name.data.title()
          college_code = form.college_code.data.upper()
 
-         sql = "INSERT INTO Program (program_code, program_name, college) VALUES (%s, %s, %s)"
-         cursor.execute(sql, (program_code, program_name, college_code))
-         db.commit()
+         add_programdb(program_code, program_name, college_code)
          
          flash("Program added successfully!", "success")
          return redirect(url_for("program.program"))
@@ -77,20 +65,13 @@ def add_program():
 
    except Exception as e:
       flash(f"An Error Occured:{e}", "danger")
-   finally:
-      if cursor:
-         cursor.close()
-      if db:
-         db.close()
    
    return redirect(url_for("program.program"))
 
 @program_bp.route("/edit_program/<program_code>", methods =["POST", "GET"])
 def edit_program(program_code):
-   db, cursor= database_connect()
-
-   cursor.execute("SELECT college_code, college_name FROM college")
-   colleges = cursor.fetchall()
+   
+   colleges = get_colleges()
 
    add_form = addProgramForm()
    edit_form = editProgramForm()
@@ -99,8 +80,7 @@ def edit_program(program_code):
    try:
 
       if request.method == "GET":
-         cursor.execute("SELECT * FROM Program WHERE program_code = %s", (program_code,))
-         program = cursor.fetchone()
+         program = get_program_by_code(program_code)
       
          if not program:
             return redirect(url_for("program.program"))
@@ -117,9 +97,9 @@ def edit_program(program_code):
             new_program_name = edit_form.edit_program_name.data.title()
             new_college = edit_form.college_code.data.upper()
 
-            sql = "UPDATE Program SET program_code = %s, program_name = %s, college = %s WHERE program_code = %s"
-            cursor.execute(sql, (new_program_code, new_program_name, new_college, program_code))
-            db.commit()
+            program_data = (new_program_code, new_program_name, new_college)
+            update_program(program_data, program_code)
+
             flash(f"Program edited successfully!","success")
             return redirect(url_for("program.program"))
          else:
@@ -134,26 +114,16 @@ def edit_program(program_code):
    except Exception as e:
       flash(f"An Error Occured:{e}", "danger")
 
-   finally:
-      if cursor:
-         cursor.close()
-      if db:
-         db.close()
-
-   return render_template("program.html", edit_form = edit_form, add_form = add_form)
+   return redirect(url_for("program.program"))
 
 @program_bp.route("/delete_program/<program_code>", methods = ["POST", "GET"])
 
 def delete_program(program_code):
    delete_form = deleteProgramForm()
-   db,cursor = database_connect()
 
    if delete_form.validate_on_submit():
-      sql = "DELETE FROM Program WHERE program_code = %s"
-      cursor.execute(sql, (program_code,))
-      db.commit()
-      cursor.close()
-      db.close()
+      
+      delete_programdb(program_code)
       flash("Program deleted successfully!", "success")
       return redirect(url_for("program.program"))
    

@@ -186,6 +186,7 @@
                     <div class="mb-3">
                         <label for="editPhoto" class="form-label">Upload New Photo</label>
                         {{ edit_form.edit_photo(class="form-control") }}
+
                         {% for error in edit_form.edit_photo.errors %}
                             <span class="text-danger">{{ error }}</span>
                         {% endfor %}

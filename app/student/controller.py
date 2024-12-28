@@ -11,6 +11,7 @@ import cloudinary
 import cloudinary.uploader
 from cloudinary.uploader import upload
 import re
+from app.models.student_model import *
 
 @student_bp.route("/")
 @student_bp.route("/student", methods = ['POST', 'GET'])
@@ -20,25 +21,15 @@ def student():
    offset = (page - 1) * per_page
    total_pages = 0
 
-   db,cursor = database_connect()
    add_form = addStudentForm()
    edit_form = editStudentForm()
-   if not db or not cursor:
-      flash("Unable to connect to the database", "error")
-      return render_template("student.html", add_form = add_form, edit_form = edit_form)
    try:
-      cursor.execute("SELECT COUNT(*) FROM Student")
-      total_students = cursor.fetchone()[0]
+      total_students = get_total_students()
 
-      cursor.execute(
-        "SELECT student_id, first_name, last_name, program, year, gender FROM Student LIMIT %s OFFSET %s",
-        (per_page, offset)
-    )
-      students = cursor.fetchall()
+      students = get_students(per_page, offset)
       total_pages = math.ceil(total_students / per_page)
 
-      cursor.execute("SELECT program_code, program_name FROM program")
-      programs = cursor.fetchall()
+      programs = get_programs()
 
       add_form.course.choices = [(program[0], program[1]) for program in programs]
       edit_form.course.choices = [(program[0], program[1]) for program in programs]
@@ -47,18 +38,12 @@ def student():
    except Exception as e:
       flash(f"An Error Occurred", "danger")
       return render_template("student.html", add_form = add_form, edit_form = edit_form, student = [], current_page = page, total_pages = total_pages)
-   finally:
-      cursor.close()
-      db.close()
 
 
 @student_bp.route("/add_student", methods=["POST"])
 def add_student():
     add_form = addStudentForm()
-    db, cursor = database_connect()
-
-    cursor.execute("SELECT program_code, program_name FROM program")
-    programs = cursor.fetchall()
+    programs = get_programs()
     add_form.course.choices = [(program[0], program[1]) for program in programs]
     
     try:
@@ -87,12 +72,8 @@ def add_student():
                     print(f"Cloudinary upload error: {str(e)}")
                     flash(f"Error uploading photo: {str(e)}", "error")
 
-            sql = """INSERT INTO Student 
-                    (student_id, first_name, last_name, program, year, gender, photo_url) 
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-            cursor.execute(sql, (student_id, first_name, last_name, 
-                               course, year, gender, photo_url))
-            db.commit()
+            student_data = (student_id, first_name, last_name, course, year, gender, photo_url)
+            add_studentdb(student_data)
 
             flash("Student added successfully!", "success")
             return redirect(url_for("student.student"))
@@ -110,29 +91,22 @@ def add_student():
         print(f"General error: {str(e)}")
         flash(f"An Error Occurred: {e}", "error")
 
-    finally:
-        cursor.close()
-        db.close()
-
     edit_form = editStudentForm()
     return render_template("student.html", add_form=add_form, edit_form=edit_form)
 
 
 @student_bp.route("/edit_student/<student_id>", methods=["POST", "GET"])
 def edit_student(student_id):
-    db, cursor = database_connect()
-    cursor.execute("SELECT program_code, program_name FROM program")
-    programs = cursor.fetchall()
+    programs = get_programs()
     edit_form = editStudentForm()
     edit_form.course.choices = [(program[0], program[1]) for program in programs]
+    student = get_student_by_id(student_id)
+    if not student:
+        flash("Student not found", "danger")
+        return redirect(url_for("student.student"))
 
     try:
         if request.method == "GET":
-            cursor.execute("SELECT * FROM Student WHERE student_id = %s", (student_id,))
-            student = cursor.fetchone()
-            
-            if not student:
-                return redirect(url_for("student.student"))
             
             edit_form.edit_student_id.data = student['student_id']
             edit_form.edit_first_name.data = student['first_name']
@@ -162,13 +136,8 @@ def edit_student(student_id):
                 else:
                     new_photo_url = student['photo_url']
 
-                sql = """UPDATE Student 
-                        SET student_id = %s, first_name = %s, last_name = %s, 
-                            program = %s, year = %s, gender = %s, photo_url = %s 
-                        WHERE student_id = %s"""
-                cursor.execute(sql, (new_student_id, new_first_name, new_last_name, 
-                                    new_course, new_year, new_gender, new_photo_url, student_id))
-                db.commit()
+                student_data = (new_student_id, new_first_name, new_last_name, new_course, new_year, new_gender, new_photo_url)
+                update_student(student_id, student_data)
                 flash("Student edited successfully", "success")
                 return redirect(url_for("student.student"))
 
@@ -180,44 +149,26 @@ def edit_student(student_id):
     except Exception as e:
         flash(f"An error occurred: {str(e)}", "danger")
 
-    finally:
-        if cursor:
-            cursor.close()
-        if db:
-            db.close()
-
-    return render_template("student.html", edit_form=edit_form)
+    return redirect(url_for("student.student"))
 
 
 
 
 @student_bp.route("/delete_student/<student_id>", methods=['POST'])
-def delete_student(student_id):
-    db, cursor = database_connect()
-    if not db or not cursor:
-        flash("Cannot connect to database")
-        return redirect(url_for("student.student"))
+def delete_student(student_id): 
 
     try:
-        sql_select = "SELECT photo_url FROM Student WHERE student_id = %s"
-        cursor.execute(sql_select, (student_id,))
-        student = cursor.fetchone()
+        student = get_student_by_id(student_id)
         
         if student:
-            photo_url = student[0]
+            photo_url = student['photo_url']
             public_id = f"images/{student_id}"
             
             cloudinary.api.delete_resources(public_id)
 
-        sql_delete = "DELETE FROM Student WHERE student_id = %s"
-        cursor.execute(sql_delete, (student_id,))
-        db.commit()
+        delete_studentdb(student_id)
         flash("Student deleted successfully", "success")
     except Exception as e:
-        db.rollback()
         flash(f"Error deleting student: {str(e)}", "danger")
-    finally:
-        cursor.close()
-        db.close()
 
     return redirect(url_for("student.student"))
